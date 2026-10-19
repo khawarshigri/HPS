@@ -1,0 +1,9 @@
+{
+  "name": "hps-music-room-server",
+  "version": "1.0.0",
+  "description": "HPS Music Room: student accounts, classes, progress sync and the teacher/admin dashboard",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "license": "UNLICENSED"
+}

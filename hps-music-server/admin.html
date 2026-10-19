@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HPS Music Room · Teacher Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Andika:wght@400;700&display=swap">
+<style>
+:root{
+  --bg:#F4F2FB;--surface:#fff;--ink:#2D2A4A;--soft:#6E6A8F;--line:#E5E1F4;
+  --accent:#EE7C9E;--accent-soft:#FDE4EC;--gold:#E6A41F;--gold-soft:#FFF3D6;
+  --violet:#8E7CE6;--violet-soft:#ECE8FD;--teal:#2FAE8E;--teal-soft:#DCF4EB;--blue:#3D97DB;--blue-soft:#DEEFFC;--orange:#EE8E45;--orange-soft:#FFEBDC;
+  --bad:#E5484D;--display:"Fredoka","Baloo 2","Trebuchet MS",system-ui,sans-serif;--body:"Andika","Nunito","Segoe UI",system-ui,sans-serif;
+  --r:20px;--shadow:0 10px 30px -14px rgba(78,62,140,.28),0 2px 6px rgba(78,62,140,.06)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15.5px}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(40vmax 40vmax at 0 0,#FBE3EE,transparent 60%),radial-gradient(45vmax 45vmax at 100% 10%,#DEEFFC,transparent 60%),radial-gradient(40vmax 40vmax at 50% 110%,#E9E6FC,transparent 60%)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+h1,h2,h3{font-family:var(--display);font-weight:600;margin:0}
+[hidden]{display:none!important}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:999px;background:var(--accent);color:#fff;font-family:var(--display);font-weight:600;font-size:16px;box-shadow:0 8px 18px -10px var(--accent);transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.soft{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
+.btn.violet{background:var(--violet);box-shadow:0 8px 18px -10px var(--violet)}
+.btn.small{height:34px;padding:0 12px;font-size:14px}
+.btn.danger{background:#fff;color:var(--bad);box-shadow:inset 0 0 0 2px #F6C9CB}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.field label{font-weight:700;font-size:13.5px;color:var(--soft)}
+.field input,.field select{height:46px;border-radius:14px;border:2px solid var(--line);padding:0 14px;background:#fff;outline:none;transition:border .15s}
+.field input:focus,.field select:focus{border-color:var(--violet)}
+.err{color:var(--bad);font-weight:700;font-size:14px;min-height:20px}
+
+/* login */
+#login{min-height:100vh;display:grid;place-items:center;padding:20px}
+.lcard{width:min(420px,100%);background:#fff;border-radius:30px;box-shadow:var(--shadow);padding:28px;animation:in .5s cubic-bezier(.2,.9,.25,1)}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.brand .logo{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,var(--violet),var(--accent));color:#fff}
+.brand small{display:block;color:var(--soft);font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+.brand b{font-family:var(--display);font-size:22px;font-weight:600}
+@keyframes in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* layout */
+#app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.side{background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
+.nav{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:14px;font-weight:700;color:var(--soft);text-align:left;transition:background .15s,color .15s}
+.nav svg{width:20px;height:20px;flex:none}
+.nav:hover{background:#fff}
+.nav.on{background:var(--violet-soft);color:var(--violet)}
+.side .me{margin-top:auto;background:#fff;border-radius:16px;padding:12px;box-shadow:var(--shadow)}
+.side .me b{display:block}
+.side .me small{color:var(--soft)}
+.role{display:inline-block;margin-top:6px;font-size:11.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;border-radius:999px;padding:3px 9px;background:var(--gold-soft);color:#A7700A}
+main{padding:22px clamp(14px,3vw,34px) 40px;min-width:0}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.top h1{font-size:clamp(24px,3vw,32px)}
+.top p{margin:2px 0 0;color:var(--soft)}
+.top .acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.menu{display:none}
+@media (max-width:860px){#app{grid-template-columns:1fr}.side{position:fixed;inset:0 auto 0 0;width:250px;z-index:30;transform:translateX(-105%);transition:transform .25s;background:#fff}.side.open{transform:none}.menu{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#fff;box-shadow:var(--shadow)}}
+
+/* cards */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);padding:16px;display:flex;gap:12px;align-items:center;animation:in .45s both}
+.stat .ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--t);color:var(--c);flex:none}
+.stat .ic svg{width:24px;height:24px}
+.stat b{font-family:var(--display);font-size:26px;font-weight:700;display:block;line-height:1.1}
+.stat small{color:var(--soft);font-weight:700}
+.panel{background:#fff;border-radius:24px;box-shadow:var(--shadow);padding:18px;margin-bottom:16px;animation:in .45s both}
+.panel h2{font-size:20px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.panel h2 .sp{margin-left:auto}
+.grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+@media (max-width:1100px){.grid2{grid-template-columns:1fr}}
+.classes{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.ccard{position:relative;overflow:hidden;text-align:left;background:#fff;border-radius:22px;box-shadow:var(--shadow);padding:16px;transition:transform .2s;display:flex;flex-direction:column;gap:8px}
+.ccard:hover{transform:translateY(-4px)}
+.ccard::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:var(--c)}
+.ccard h3{font-size:19px}
+.ccard .t{color:var(--soft);font-size:14px}
+.code{display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,Consolas,monospace;font-weight:800;letter-spacing:2px;background:var(--violet-soft);color:var(--violet);border-radius:10px;padding:4px 10px;font-size:15px}
+.mini{display:flex;gap:14px;color:var(--soft);font-size:13.5px;font-weight:700}
+.bar{height:9px;border-radius:5px;background:#EEEBF8;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--violet),var(--accent));width:0;transition:width .9s cubic-bezier(.2,.9,.25,1)}
+/* table */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:separate;border-spacing:0 6px;min-width:760px}
+th{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--soft);text-align:left;padding:4px 10px;font-weight:800}
+td{background:#FAF9FE;padding:10px;vertical-align:middle}
+tr td:first-child{border-radius:14px 0 0 14px}
+tr td:last-child{border-radius:0 14px 14px 0}
+tbody tr{transition:transform .15s}
+tbody tr:hover td{background:#F2EFFC}
+.who{display:flex;align-items:center;gap:10px}
+.av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;color:#fff;background:var(--c);flex:none}
+.who b{display:block}
+.who small{color:var(--soft)}
+.stars{color:var(--gold);font-weight:800;white-space:nowrap}
+.pill{display:inline-block;border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:800;background:var(--t);color:var(--c);white-space:nowrap}
+.rowacts{display:flex;gap:6px;justify-content:flex-end}
+.ib{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#fff;box-shadow:0 2px 6px rgba(45,42,74,.1);color:var(--soft)}
+.ib:hover{color:var(--violet)}
+.ib svg{width:17px;height:17px}
+.search{height:42px;border-radius:999px;border:2px solid var(--line);padding:0 16px;min-width:220px;outline:none;background:#fff}
+.empty{text-align:center;color:var(--soft);padding:30px 10px}
+.empty b{display:block;font-family:var(--display);font-size:19px;color:var(--ink);margin-bottom:4px}
+/* modal & drawer */
+.scrim{position:fixed;inset:0;background:rgba(45,42,74,.35);z-index:40;display:grid;place-items:center;padding:16px;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.modal{width:min(460px,100%);background:#fff;border-radius:26px;box-shadow:var(--shadow);padding:22px;animation:pop .3s cubic-bezier(.3,1.4,.5,1);max-height:92vh;overflow:auto}
+@keyframes pop{from{opacity:0;transform:scale(.94) translateY(10px)}}
+.modal h3{font-size:22px;margin-bottom:12px}
+.mfoot{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+.tabs{display:flex;gap:6px;background:#F3F1FA;border-radius:999px;padding:4px;margin-bottom:14px}
+.tabs button{flex:1;height:36px;border-radius:999px;font-weight:700;color:var(--soft)}
+.tabs button.on{background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(45,42,74,.1)}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--bg);z-index:41;box-shadow:-20px 0 50px -20px rgba(45,42,74,.4);overflow:auto;padding:20px;animation:slide .3s cubic-bezier(.2,.9,.25,1)}
+@keyframes slide{from{transform:translateX(40px);opacity:0}}
+.dhead{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.dhead .av{width:60px;height:60px;font-size:24px}
+.remark{background:var(--gold-soft);border-radius:16px;padding:12px 14px;line-height:1.5;margin-bottom:14px}
+.chap{margin-bottom:12px}
+.chap .hd{display:flex;justify-content:space-between;font-weight:700;margin-bottom:6px}
+.acts{display:flex;flex-wrap:wrap;gap:6px}
+.act{border-radius:12px;padding:6px 10px;font-size:13px;background:#fff;box-shadow:0 1px 4px rgba(45,42,74,.08)}
+.act.none{opacity:.5}
+.act b{color:var(--gold)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{border-radius:999px;padding:5px 11px;font-size:13px;font-weight:700;background:#fff;color:var(--soft)}
+.chips span.on{background:var(--teal-soft);color:#1E7C64}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:999px;font-weight:700;z-index:60;animation:pop .3s}
+.share{background:var(--violet-soft);border-radius:16px;padding:12px 14px;margin:10px 0;line-height:1.5}
+</style>
+</head>
+<body>
+<!-- login -->
+<section id="login">
+  <form class="lcard" id="lform">
+    <div class="brand"><div class="logo"><svg width="28" height="28" viewBox="0 0 24 24"><path d="M9 3v11.3A3.5 3.5 0 1 0 11 17V8h7V3z" fill="#fff"/></svg></div><div><small>Habib Public School</small><b>Music Room Dashboard</b></div></div>
+    <h2 style="font-size:24px;margin-bottom:4px">Welcome back!</h2>
+    <p style="margin:0 0 16px;color:var(--soft)">Teachers and school admins log in here to see students' progress and manage classes.</p>
+    <div class="field"><label for="lu">Username</label><input id="lu" autocomplete="username" required></div>
+    <div class="field"><label for="lp">Password</label><input id="lp" type="password" autocomplete="current-password" required></div>
+    <div class="err" id="lerr"></div>
+    <button class="btn" style="width:100%;margin-top:6px" type="submit">Log in</button>
+  </form>
+</section>
+
+<!-- app -->
+<div id="app" hidden>
+  <aside class="side" id="side">
+    <div class="brand" style="margin:2px 4px 14px"><div class="logo" style="width:42px;height:42px;border-radius:13px"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M9 3v11.3A3.5 3.5 0 1 0 11 17V8h7V3z" fill="#fff"/></svg></div><div><small>HPS</small><b style="font-size:18px">Music Room</b></div></div>
+    <button class="nav" data-v="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>Overview</button>
+    <button class="nav" data-v="classes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 7l9-4 9 4-9 4z"/><path d="M7 9.5V15c0 1.5 2.5 3 5 3s5-1.5 5-3V9.5"/></svg>Classes</button>
+    <button class="nav" data-v="students"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.3.2 4 1.8 4.5 4.5"/></svg>Students</button>
+    <button class="nav" data-v="teachers" id="navT"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M4 21c1-4.5 4-7 8-7s7 2.5 8 7"/><path d="M15.5 14.5 12 18l-3.5-3.5"/></svg>Teachers</button>
+    <div class="me" id="meBox"></div>
+    <button class="btn soft small" id="logout" style="margin-top:8px">Log out</button>
+  </aside>
+  <main>
+    <div class="top"><button class="menu" id="menu" aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div><h1 id="title"></h1><p id="subtitle"></p></div><div class="acts" id="topActs"></div></div>
+    <div id="view"></div>
+  </main>
+</div>
+
+<script>
+(() => {
+const API = location.protocol.startsWith('http') ? '' : (localStorage.getItem('hps-api') || 'http://localhost:8080');
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+let token = localStorage.getItem('hps-admin-token'), D = null, CAT = null, view = 'overview', curClass = null;
+const COLS = ['#8E7CE6', '#EE7C9E', '#2FAE8E', '#3D97DB', '#EE8E45', '#E6A41F'];
+const colFor = (s) => COLS[[...String(s)].reduce((a, c) => a + c.charCodeAt(0), 0) % COLS.length];
+const initials = (n) => String(n).split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+async function api(method, url, body) {
+  const r = await fetch(API + url, { method, headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) }, body: body ? JSON.stringify(body) : undefined });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && url !== '/api/auth/login') { logout(); throw new Error(j.error || 'Please log in again.'); }
+  if (!r.ok) throw new Error(j.error || 'Something went wrong.');
+  return j;
+}
+function toast(t) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2400); }
+const ago = (t) => { if (!t) return 'Not yet'; const m = (Date.now() - t) / 60000; if (m < 2) return 'Just now'; if (m < 60) return Math.round(m) + ' min ago'; const h = m / 60; if (h < 24) return Math.round(h) + ' h ago'; const d = h / 24; return d < 30 ? Math.round(d) + ' days ago' : new Date(t).toLocaleDateString('en-GB'); };
+
+/* ---------- badges ---------- */
+const BADGES = [['ch1','Orchestra Explorer','#8E7CE6',2],['ch2','Alphabet Navigator','#3D97DB',2],['ch3','Rhythm Keeper','#EE8E45',2],['ch4','Staff Star','#2FAE8E',2],['ch5','Clef Reader','#EE7C9E',2],['m2','Music Theory Maestro','#E6A41F',2,1],
+  ['f-strings','String Player','#8E7CE6',3],['f-woodwind','Woodwind Wizard','#2FAE8E',3],['f-brass','Brass Blaster','#E6A41F',3],['f-percussion','Percussion Pro','#EE7C9E',3],['hero','Note Hero','#3D97DB',3],['song','Songwriter','#EE8E45',3],['m3','Music Studio Virtuoso','#8E7CE6',3,1],
+  ['m3-first','First Tune','#2FAE8E',3],['m3-tut','Tutorial Graduate','#3D97DB',3],['m3-perfect','Perfect Performance','#E6A41F',3],['m3-all','Orchestra Tour','#8E7CE6',3],
+  ['hero-first','First Crown','#E6A41F',3],['hero-triple','Triple Crown','#EE7C9E',3],['hero-collector','Crown Collector','#8E7CE6',3],['hero-classic','Classic Hero','#3D97DB',3],['hero-drums','Drum Hero','#EE8E45',3],['hero-combo','Combo Champion','#E5484D',3],
+  ['m1-ready','Ready Listener','#3D97DB',1],['m1-kind','Kindness Champion','#EE7C9E',1],['m1','Ethics Star','#2FAE8E',1,1]];
+const medal = (c, big) => `<svg width="${big ? 46 : 38}" height="${big ? 52 : 43}" viewBox="0 0 100 114" aria-hidden="true"><path d="M30 78l-10 34 16-7 10 9 6-30z" fill="${c}" opacity=".7"/><path d="M70 78l10 34-16-7-10 9-6-30z" fill="${c}" opacity=".7"/><circle cx="50" cy="52" r="42" fill="${c}"/><circle cx="50" cy="52" r="33" fill="none" stroke="#fff" stroke-width="4"/>${big ? '<path d="M36 38h28v12a14 14 0 0 1-28 0zM46 64h8v8h-8z" fill="#fff"/>' : '<path d="M50 30l6 13 14 2-10 10 2 14-12-7-12 7 2-14-10-10 14-2z" fill="#fff"/>'}</svg>`;
+/* ---------- progress summary ---------- */
+function parse(s) { try { return JSON.parse(s) || {}; } catch (e) { return {}; } }
+function summary(st) {
+  const p = st.progress || {}, m2 = parse(p['hps-m2-v1']), m3 = parse(p['m3-music-v2']), hero = parse(p['hps-hero-v1']), songs = parse(p['hps-lyrics-v1']);
+  const stars2 = m2.stars || {}, acts = CAT.acts;
+  const done = acts.filter((a) => stars2[a.id]).length, stars = acts.reduce((t, a) => t + (stars2[a.id] || 0), 0);
+  const chapters = CAT.chapters.map((c) => { const ids = acts.filter((a) => a.ch === c.n); return { ...c, acts: ids.map((a) => ({ ...a, stars: stars2[a.id] || 0 })), done: ids.filter((a) => stars2[a.id]).length, total: ids.length, stars: ids.reduce((t, a) => t + (stars2[a.id] || 0), 0) }; });
+  const L = m3.lessons || {}, T = m3.tut || {}, per = {};
+  Object.entries(L).forEach(([k, v]) => { const i = k.split(':')[0]; per[i] ||= { n: 0, st: 0 }; per[i].n++; per[i].st += v.stars || 0; });
+  const played = Object.keys(CAT.m3).filter((k) => per[k] || T[k]);
+  const m3stars = Object.values(L).reduce((t, v) => t + (v.stars || 0), 0);
+  const hb = hero.best || {}; let heroBest = 0, heroStars = 0, levels = new Set();
+  Object.entries(hb).forEach(([k, v]) => { heroBest = Math.max(heroBest, v.score || 0); heroStars += v.stars || 0; const m = k.match(/:lv(\d+):/); if (m && v.stars) levels.add(+m[1]); });
+  const pct = Math.round(done / acts.length * 100);
+  const weak = acts.filter((a) => stars2[a.id] === 1).map((a) => a.title);
+  const next = acts.find((a) => !stars2[a.id]);
+  let remark = done === 0 ? 'Has not started Music Theory yet.' : pct >= 100 ? 'Finished every Music Theory activity. Excellent work!' : pct >= 70 ? 'Strong progress in Music Theory.' : pct >= 35 ? 'Making steady progress.' : 'A good start. Encourage regular practice.';
+  if (weak.length) remark += ` Could practise again: ${weak.slice(0, 2).join(', ')}.`;
+  if (next && done) remark += ` Next activity: ${next.title}.`;
+  if (played.length) remark += ` Has played ${played.length} of ${Object.keys(CAT.m3).length} instruments.`;
+  const bd = parse(p['hps-badges-v1']), badges = BADGES.filter((b) => bd[b[0]]).map((b) => ({ id: b[0], name: b[1], c: b[2], mod: b[3], big: b[4], at: bd[b[0]] }));
+  return { badges, points: m2.points || 0, done, total: acts.length, stars, maxStars: acts.length * 3, pct, chapters, played, per, m3stars, lessons: Object.keys(L).length, heroBest, heroStars, levels: [...levels].sort((a, b) => a - b), heroPlays: hero.plays || 0, songs: Array.isArray(songs) ? songs.length : 0, remark };
+}
+
+/* ---------- auth ---------- */
+$('#lform').onsubmit = async (e) => {
+  e.preventDefault(); $('#lerr').textContent = '';
+  try { const r = await api('POST', '/api/auth/login', { username: $('#lu').value, password: $('#lp').value, role: 'staff' }); token = r.token; localStorage.setItem('hps-admin-token', token); start(); }
+  catch (er) { $('#lerr').textContent = er.message; }
+};
+function logout() { if (token) fetch(API + '/api/auth/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + token } }).catch(() => {}); token = null; localStorage.removeItem('hps-admin-token'); $('#app').hidden = true; $('#login').hidden = false; }
+$('#logout').onclick = logout;
+$('#menu').onclick = () => $('#side').classList.toggle('open');
+$$('.nav').forEach((b) => b.onclick = () => { view = b.dataset.v; curClass = null; $('#side').classList.remove('open'); render(); });
+
+async function start() {
+  try { CAT = CAT || await api('GET', '/api/catalog'); await refresh(); } catch (e) { return; }
+  $('#login').hidden = true; $('#app').hidden = false; render();
+}
+async function refresh() { D = await api('GET', '/api/overview'); D.students.forEach((s) => s.sum = summary(s)); }
+const isSuper = () => D.me.role === 'superadmin';
+
+/* ---------- render ---------- */
+function render() {
+  $$('.nav').forEach((b) => b.classList.toggle('on', b.dataset.v === view));
+  $('#navT').hidden = !isSuper();
+  $('#meBox').innerHTML = `<b>${esc(D.me.name)}</b><small>@${esc(D.me.username)}</small><br><span class="role">${isSuper() ? 'Super admin' : 'Teacher'}</span>`;
+  $('#topActs').innerHTML = '';
+  ({ overview, classes: curClass ? classDetail : classesView, students: studentsView, teachers: teachersView })[view]();
+  requestAnimationFrame(() => requestAnimationFrame(() => $$('.bar i[data-w]').forEach((i) => i.style.width = i.dataset.w)));
+}
+const ICON = {
+  cls: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 7l9-4 9 4-9 4z"/><path d="M7 9.5V15c0 1.5 2.5 3 5 3s5-1.5 5-3V9.5"/></svg>',
+  stu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/></svg>',
+  star: '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z" fill="currentColor"/></svg>',
+  act: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>',
+  eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  key: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3"/></svg>',
+  out: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+};
+const stat = (ic, val, lab, c, t, i) => `<div class="stat" style="--c:${c};--t:${t};animation-delay:${i * .05}s"><span class="ic">${ic}</span><span><b>${val}</b><small>${lab}</small></span></div>`;
+function setTop(t, s) { $('#title').textContent = t; $('#subtitle').textContent = s; }
+
+function overview() {
+  setTop(isSuper() ? 'Welcome back!' : `Hello, ${D.me.name.replace(/^(mr|mrs|ms|miss|dr|sir|madam)\.?\s+/i, '').split(' ')[0]}!`, isSuper() ? 'Here is how the whole school is doing in the Music Room.' : 'Here is how your classes are doing in the Music Room.');
+  const S = D.students, act7 = S.filter((s) => s.lastActive && Date.now() - s.lastActive < 7 * 864e5).length;
+  const avg = S.length ? Math.round(S.reduce((t, s) => t + s.sum.pct, 0) / S.length) : 0;
+  const top = [...S].sort((a, b) => b.sum.stars + b.sum.m3stars - (a.sum.stars + a.sum.m3stars)).slice(0, 5);
+  const need = S.filter((s) => s.sum.done && s.sum.pct < 35).slice(0, 5);
+  $('#view').innerHTML = `<div class="stats">${stat(ICON.cls, D.classes.length, 'Classes', '#8E7CE6', '#ECE8FD', 0)}${stat(ICON.stu, S.length, 'Students', '#EE7C9E', '#FDE4EC', 1)}${stat(ICON.act, act7, 'Active this week', '#2FAE8E', '#DCF4EB', 2)}${stat(ICON.star, avg + '%', 'Average theory progress', '#E6A41F', '#FFF3D6', 3)}${isSuper() ? stat(ICON.stu, (D.teachers || []).length, 'Teachers', '#3D97DB', '#DEEFFC', 4) : ''}</div>
+  <div class="grid2"><div class="panel"><h2>Class progress</h2>${D.classes.length ? D.classes.map((c) => { const st = S.filter((s) => s.classIds.includes(c.id)), p = st.length ? Math.round(st.reduce((t, s) => t + s.sum.pct, 0) / st.length) : 0;
+      return `<div style="margin-bottom:14px;cursor:pointer" data-open="${c.id}"><div style="display:flex;justify-content:space-between;font-weight:700;margin-bottom:6px"><span>${esc(c.name)} <span style="color:var(--soft);font-weight:400">· ${st.length} students${isSuper() ? ' · ' + esc(c.teacherName) : ''}</span></span><span>${p}%</span></div><div class="bar"><i data-w="${p}%"></i></div></div>`; }).join('') : emptyHTML('No classes yet', 'Create a class to get a class code for your students.')}</div>
+    <div class="panel"><h2>Star students</h2>${top.length ? top.map((s, i) => `<div class="who" style="margin-bottom:10px;cursor:pointer" data-stu="${s.id}"><span class="av" style="--c:${colFor(s.username)}">${initials(s.name)}</span><span style="flex:1"><b>${esc(s.name)}</b><small>${s.sum.done}/${s.sum.total} theory · ${s.sum.played.length} instruments · ${s.sum.badges.length} badges</small></span><span class="stars">★ ${s.sum.stars + s.sum.m3stars}</span></div>`).join('') : emptyHTML('No students yet', 'Share a class code so students can sign up in the app.')}
+    ${need.length ? `<h2 style="margin-top:16px">Might need a hand</h2>${need.map((s) => `<div class="who" style="margin-bottom:8px;cursor:pointer" data-stu="${s.id}"><span class="av" style="--c:${colFor(s.username)}">${initials(s.name)}</span><span><b>${esc(s.name)}</b><small>${s.sum.pct}% of theory done</small></span></div>`).join('')}` : ''}</div></div>`;
+  $$('[data-open]').forEach((e) => e.onclick = () => { view = 'classes'; curClass = e.dataset.open; render(); });
+  $$('[data-stu]').forEach((e) => e.onclick = () => studentDrawer(e.dataset.stu));
+}
+const emptyHTML = (b, t) => `<div class="empty"><b>${b}</b>${t}</div>`;
+
+function classesView() {
+  setTop('Classes', 'Each class has a code. Students type it in the app when they sign up.');
+  $('#topActs').innerHTML = `<button class="btn" id="newClass">+ New class</button>`; $('#newClass').onclick = newClassModal;
+  $('#view').innerHTML = D.classes.length ? `<div class="classes">${D.classes.map((c, i) => { const st = D.students.filter((s) => s.classIds.includes(c.id)), p = st.length ? Math.round(st.reduce((t, s) => t + s.sum.pct, 0) / st.length) : 0;
+    return `<button class="ccard" data-id="${c.id}" style="--c:${COLS[i % COLS.length]}"><h3>${esc(c.name)}</h3><span class="t">${isSuper() ? 'Teacher: ' + esc(c.teacherName) : 'Your class'}</span><span><span class="code">${c.code}</span></span>
+      <span class="mini"><span>${st.length} students</span><span>${p}% theory</span></span><span class="bar"><i data-w="${p}%"></i></span></button>`; }).join('')}</div>`
+    : `<div class="panel">${emptyHTML('No classes yet', 'Press “New class” to create one and get a class code.')}</div>`;
+  $$('.ccard').forEach((b) => b.onclick = () => { curClass = b.dataset.id; render(); });
+}
+function newClassModal() {
+  modal(`<h3>New class</h3><div class="field"><label>Class name</label><input id="cn" placeholder="e.g. Grade 3 · Music"></div>
+    ${isSuper() ? `<div class="field"><label>Teacher</label><select id="ct">${(D.teachers || []).map((t) => `<option value="${t.id}">${esc(t.name)} (@${esc(t.username)})</option>`).join('')}</select></div>${(D.teachers || []).length ? '' : '<p class="err">Add a teacher first.</p>'}` : ''}
+    <div class="err" id="merr"></div><div class="mfoot"><button class="btn soft" data-x>Cancel</button><button class="btn" id="ok">Create class</button></div>`, async (m) => {
+    const r = await api('POST', '/api/classes', { name: $('#cn', m).value, teacherId: $('#ct', m) && $('#ct', m).value });
+    toast(`Class created. Code: ${r.code}`); await refresh(); curClass = r.id; view = 'classes'; render(); });
+}
+
+function classDetail() {
+  const c = D.classes.find((x) => x.id === curClass); if (!c) { curClass = null; return classesView(); }
+  const st = D.students.filter((s) => s.classIds.includes(c.id));
+  setTop(c.name, isSuper() ? `Teacher: ${c.teacherName}` : `${st.length} students`);
+  $('#topActs').innerHTML = `<button class="btn soft" id="back">← All classes</button><button class="btn soft" id="csv">Download CSV</button><button class="btn" id="addS">+ Add student</button>`;
+  $('#back').onclick = () => { curClass = null; render(); }; $('#addS').onclick = () => addStudentModal(c); $('#csv').onclick = () => csv(c, st);
+  $('#view').innerHTML = `<div class="panel"><h2>Class code <span class="code" style="font-size:20px">${c.code}</span><span class="sp"></span><button class="btn soft small" id="copy">Copy invite</button><button class="btn soft small" id="regen">New code</button><button class="btn soft small" id="ren">Edit class</button><button class="btn danger small" id="delc">Delete class</button></h2>
+    <div class="share">Students open the HPS Music Room app, tap <b>Sign up</b>, and type the class code <b>${c.code}</b>. Their stars and scores will appear here automatically.</div></div>
+    <div class="panel"><h2>Students <span style="color:var(--soft);font-weight:500;font-size:15px">${st.length}</span></h2>${st.length ? studentTable(st, c) : emptyHTML('No students in this class yet', 'Share the class code, or press “Add student” to create accounts yourself.')}</div>`;
+  $('#copy').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(`Join my class in the HPS Music Room app! Tap Sign up and use class code ${c.code}.`); toast('Invite copied'); };
+  $('#regen').onclick = () => confirmBox('Make a new class code?', 'The old code will stop working for new sign-ups. Students already in the class stay in it.', 'Make new code', async () => { await api('PATCH', '/api/classes/' + c.id, { newCode: true }); await refresh(); render(); toast('New code ready'); });
+  $('#ren').onclick = () => modal(`<h3>Edit class</h3><div class="field"><label>Class name</label><input id="cn" value="${esc(c.name)}"></div>
+    ${isSuper() ? `<div class="field"><label>Teacher</label><select id="ct">${(D.teachers || []).map((t) => `<option value="${t.id}" ${t.id === c.teacherId ? 'selected' : ''}>${esc(t.name)} (@${esc(t.username)})</option>`).join('')}</select></div>` : ''}
+    <div class="err" id="merr"></div><div class="mfoot"><button class="btn soft" data-x>Cancel</button><button class="btn" id="ok">Save changes</button></div>`, async (m) => {
+    const body = { name: $('#cn', m).value }; if ($('#ct', m)) body.teacherId = $('#ct', m).value;
+    await api('PATCH', '/api/classes/' + c.id, body); await refresh(); render(); toast('Class updated'); });
+  $('#delc').onclick = () => confirmBox('Delete this class?', 'Students keep their accounts and scores, but they leave this class.', 'Delete class', async () => { await api('DELETE', '/api/classes/' + c.id); await refresh(); curClass = null; render(); toast('Class deleted'); });
+  bindTable(c);
+}
+function studentTable(list, c) {
+  return `<div class="tw"><table><thead><tr><th>Student</th><th>Music Theory</th><th>Stars</th><th>Points</th><th>Instruments</th><th>Note Hero</th><th>Badges</th><th>Last active</th><th></th></tr></thead><tbody>${list.map((s) => `<tr data-id="${s.id}">
+    <td><div class="who"><span class="av" style="--c:${colFor(s.username)}">${initials(s.name)}</span><span><b>${esc(s.name)}</b><small>@${esc(s.username)}</small></span></div></td>
+    <td style="min-width:150px"><div style="font-size:13px;font-weight:700;margin-bottom:5px">${s.sum.done}/${s.sum.total} activities</div><div class="bar"><i data-w="${s.sum.pct}%"></i></div></td>
+    <td class="stars">★ ${s.sum.stars + s.sum.m3stars}</td><td>${s.sum.points}</td>
+    <td><span class="pill" style="--t:#DCF4EB;--c:#1E7C64">${s.sum.played.length} / ${Object.keys(CAT.m3).length}</span></td>
+    <td>${s.sum.heroBest ? `<span class="pill" style="--t:#ECE8FD;--c:#6B58C9">${s.sum.heroBest.toLocaleString('en-GB')}</span>` : '<span style="color:var(--soft)">—</span>'}</td>
+    <td>${s.sum.badges.length ? `<span style="display:inline-flex;align-items:center;gap:2px">${s.sum.badges.slice(-3).map((b) => medal(b.c).replace('width="38" height="43"', 'width="22" height="25"')).join('')}<b style="margin-left:4px">${s.sum.badges.length}</b></span>` : '<span style="color:var(--soft)">—</span>'}</td>
+    <td style="color:var(--soft);white-space:nowrap">${ago(s.lastActive)}</td>
+    <td><div class="rowacts"><button class="ib" data-a="view" title="View progress">${ICON.eye}</button><button class="ib" data-a="pw" title="Reset password">${ICON.key}</button>${c ? `<button class="ib" data-a="rm" title="Remove from class">${ICON.out}</button>` : ''}<button class="ib" data-a="del" title="Delete student" style="color:#E5484D">${ICON.trash}</button></div></td></tr>`).join('')}</tbody></table></div>`;
+}
+function bindTable(c) {
+  $$('tbody tr').forEach((tr) => { const id = tr.dataset.id, s = D.students.find((x) => x.id === id);
+    tr.querySelector('[data-a=view]').onclick = () => studentDrawer(id);
+    tr.querySelector('[data-a=pw]').onclick = () => pwModal(s);
+    const rm = tr.querySelector('[data-a=rm]'); if (rm) rm.onclick = () => confirmBox(`Remove ${s.name} from ${c.name}?`, 'Their account and scores are kept. You can add them again with their username.', 'Remove', async () => { await api('DELETE', `/api/classes/${c.id}/students/${s.id}`); await refresh(); render(); toast('Student removed from class'); });
+    tr.querySelector('[data-a=del]').onclick = () => delStudent(s);
+    tr.querySelector('td').style.cursor = 'pointer'; tr.querySelector('td').onclick = () => studentDrawer(id); });
+}
+function delStudent(s, after) {
+  confirmBox(`Delete ${s.name}?`, 'This removes the student account and all their stars and scores for ever.', 'Delete student', async () => { await api('DELETE', '/api/students/' + s.id); if (after) after(); await refresh(); render(); toast('Student deleted'); });
+}
+function newStudentModal() {
+  if (!D.classes.length) return toast('Create a class first, then add students to it.');
+  modal(`<h3>Add a student</h3><div class="field"><label>Class</label><select id="sc">${D.classes.map((c) => `<option value="${c.id}">${esc(c.name)}${isSuper() ? ' · ' + esc(c.teacherName) : ''}</option>`).join('')}</select></div>
+    <div class="field"><label>Student's full name</label><input id="sn"></div><div class="field"><label>Username</label><input id="su" placeholder="e.g. sara.ali"></div><div class="field"><label>Password (at least 4 characters)</label><input id="sp" value="${Math.random().toString(36).slice(2, 8)}"></div>
+    <div class="err" id="merr"></div><div class="mfoot"><button class="btn soft" data-x>Cancel</button><button class="btn" id="ok">Add student</button></div>`, async (m) => {
+    const body = { classId: $('#sc', m).value, name: $('#sn', m).value, username: $('#su', m).value, password: $('#sp', m).value };
+    await api('POST', '/api/students', body); await refresh(); render(); toast(`Account created: ${body.username} / ${body.password}`); });
+}
+function addStudentModal(c) {
+  modal(`<h3>Add a student to ${esc(c.name)}</h3><div class="tabs"><button class="on" data-t="new">New account</button><button data-t="old">Existing student</button></div>
+    <div id="tNew"><div class="field"><label>Student's full name</label><input id="sn"></div><div class="field"><label>Username</label><input id="su" placeholder="e.g. sara.ali"></div><div class="field"><label>Password (at least 4 characters)</label><input id="sp" value="${Math.random().toString(36).slice(2, 8)}"></div></div>
+    <div id="tOld" hidden><div class="field"><label>Student's username</label><input id="eu"></div></div>
+    <div class="err" id="merr"></div><div class="mfoot"><button class="btn soft" data-x>Cancel</button><button class="btn" id="ok">Add student</button></div>`, async (m) => {
+    const old = !$('#tOld', m).hidden;
+    const body = old ? { existing: true, username: $('#eu', m).value } : { name: $('#sn', m).value, username: $('#su', m).value, password: $('#sp', m).value };
+    await api('POST', `/api/classes/${c.id}/students`, body); await refresh(); render();
+    toast(old ? 'Student added to class' : `Account created: ${body.username} / ${body.password}`); },
+    (m) => $$('.tabs button', m).forEach((b) => b.onclick = () => { $$('.tabs button', m).forEach((x) => x.classList.toggle('on', x === b)); $('#tNew', m).hidden = b.dataset.t !== 'new'; $('#tOld', m).hidden = b.dataset.t !== 'old'; }));
+}
+function pwModal(u) {
+  modal(`<h3>New password for ${esc(u.name)}</h3><p style="margin:0 0 12px;color:var(--soft)">Username: <b>@${esc(u.username)}</b>. Give the new password to them in person.</p>
+    <div class="field"><label>New password</label><input id="np" value="${Math.random().toString(36).slice(2, 8)}"></div><div class="err" id="merr"></div><div class="mfoot"><button class="btn soft" data-x>Cancel</button><button class="btn" id="ok">Save password</button></div>`,
+    async (m) => { await api('POST', `/api/users/${u.id}/password`, { password: $('#np', m).value }); toast('Password changed'); });
+}
+function studentsView() {
+  setTop('Students', isSuper() ? 'Every student in the school.' : 'Every student in your classes.');
+  $('#topActs').innerHTML = `<input class="search" id="q" placeholder="Search by name or username"><button class="btn" id="newS">+ Add student</button>`;
+  $('#newS').onclick = newStudentModal;
+  const draw = () => { const q = $('#q').value.trim().toLowerCase(); const list = D.students.filter((s) => !q || s.name.toLowerCase().includes(q) || s.username.includes(q));
+    $('#view').innerHTML = `<div class="panel">${list.length ? studentTable(list, null) : emptyHTML('No students found', q ? 'Try a different search.' : 'Students appear here when they sign up with a class code.')}</div>`; bindTable(null);
+    requestAnimationFrame(() => $$('.bar i[data-w]').forEach((i) => i.style.width = i.dataset.w)); };
+  $('#q').oninput = draw; draw();
+}
+function teachersView() {
+  if (!isSuper()) { view = 'overview'; return render(); }
+  setTop('Teachers', 'Add teachers so they can create classes and see their students.');
+  $('#topActs').innerHTML = `<button class="btn" id="newT">+ Add teacher</button>`;
+  $('#newT').onclick = () => modal(`<h3>Add a teacher</h3><div class="field"><label>Full name</label><input id="tn" placeholder="e.g. Mr. Hamza Ali"></div><div class="field"><label>Username</label><input id="tu"></div><div class="field"><label>Password (at least 6 characters)</label><input id="tp" value="Teach${Math.floor(1000 + Math.random() * 9000)}"></div><div class="err" id="merr"></div><div class="mfoot"><button class="btn soft" data-x>Cancel</button><button class="btn" id="ok">Add teacher</button></div>`,
+    async (m) => { const b = { name: $('#tn', m).value, username: $('#tu', m).value, password: $('#tp', m).value }; await api('POST', '/api/teachers', b); await refresh(); render(); toast(`Teacher added: ${b.username} / ${b.password}`); });
+  const T = D.teachers || [];
+  $('#view').innerHTML = `<div class="panel">${T.length ? `<div class="tw"><table><thead><tr><th>Teacher</th><th>Classes</th><th>Students</th><th>Last active</th><th></th></tr></thead><tbody>${T.map((t) => { const cl = D.classes.filter((c) => c.teacherId === t.id), n = D.students.filter((s) => s.classIds.some((id) => cl.some((c) => c.id === id))).length;
+    return `<tr data-id="${t.id}"><td><div class="who"><span class="av" style="--c:${colFor(t.username)}">${initials(t.name)}</span><span><b>${esc(t.name)}</b><small>@${esc(t.username)}</small></span></div></td><td>${cl.map((c) => `<span class="pill" style="--t:#ECE8FD;--c:#6B58C9;margin:2px">${esc(c.name)}</span>`).join('') || '<span style="color:var(--soft)">No classes yet</span>'}</td><td>${n}</td><td style="color:var(--soft)">${ago(t.lastActive)}</td>
+      <td><div class="rowacts"><button class="ib" data-a="ed" title="Rename">${ICON.edit}</button><button class="ib" data-a="pw" title="Reset password">${ICON.key}</button><button class="ib" data-a="del" title="Remove teacher">${ICON.out}</button></div></td></tr>`; }).join('')}</tbody></table></div>` : emptyHTML('No teachers yet', 'Press “Add teacher” to create the first teacher account.')}</div>`;
+  $$('tbody tr').forEach((tr) => { const t = T.find((x) => x.id === tr.dataset.id);
+    tr.querySelector('[data-a=pw]').onclick = () => pwModal(t);
+    tr.querySelector('[data-a=ed]').onclick = () => modal(`<h3>Rename teacher</h3><div class="field"><label>Full name</label><input id="tn" value="${esc(t.name)}"></div><div class="err" id="merr"></div><div class="mfoot"><button class="btn soft" data-x>Cancel</button><button class="btn" id="ok">Save</button></div>`, async (m) => { await api('PATCH', '/api/teachers/' + t.id, { name: $('#tn', m).value }); await refresh(); render(); });
+    tr.querySelector('[data-a=del]').onclick = () => { const others = T.filter((x) => x.id !== t.id), has = D.classes.some((c) => c.teacherId === t.id);
+      modal(`<h3>Remove ${esc(t.name)}?</h3><p style="color:var(--soft);margin:0 0 12px">${has ? 'This teacher has classes. Choose who takes them over.' : 'Their login will stop working.'}</p>${has ? `<div class="field"><label>Move classes to</label><select id="to">${others.map((o) => `<option value="${o.id}">${esc(o.name)}</option>`).join('')}</select></div>${others.length ? '' : '<p class="err">Add another teacher first.</p>'}` : ''}<div class="err" id="merr"></div><div class="mfoot"><button class="btn soft" data-x>Cancel</button><button class="btn danger" id="ok">Remove teacher</button></div>`,
+        async (m) => { await api('DELETE', `/api/teachers/${t.id}${has ? '?to=' + $('#to', m).value : ''}`); await refresh(); render(); toast('Teacher removed'); }); }; });
+}
+
+/* ---------- student drawer ---------- */
+function studentDrawer(id) {
+  const s = D.students.find((x) => x.id === id); if (!s) return; const m = s.sum;
+  const cls = D.classes.filter((c) => s.classIds.includes(c.id)).map((c) => c.name).join(', ') || 'No class';
+  const sc = document.createElement('div'); sc.className = 'scrim'; sc.style.background = 'rgba(45,42,74,.25)';
+  sc.innerHTML = `<aside class="drawer"><div style="display:flex;justify-content:flex-end"><button class="ib" data-x>${ICON.out}</button></div>
+    <div class="dhead"><span class="av" style="--c:${colFor(s.username)}">${initials(s.name)}</span><div><h2 style="font-size:24px">${esc(s.name)}</h2><span style="color:var(--soft)">@${esc(s.username)} · ${esc(cls)} · active ${ago(s.lastActive).toLowerCase()}</span></div></div>
+    <div class="stats" style="grid-template-columns:repeat(3,1fr)">${stat(ICON.star, m.stars + m.m3stars, 'Stars', '#E6A41F', '#FFF3D6', 0)}${stat(ICON.act, m.points, 'Points', '#EE7C9E', '#FDE4EC', 1)}${stat(ICON.cls, m.pct + '%', 'Theory done', '#8E7CE6', '#ECE8FD', 2)}</div>
+    <div class="remark"><b>Remark:</b> ${esc(m.remark)}</div>
+    <div class="panel"><h2>Badges and achievements <span style="color:var(--soft);font-weight:500;font-size:15px">${m.badges.length} of ${BADGES.length}</span></h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px">${BADGES.map((b) => { const got = m.badges.find((x) => x.id === b[0]); return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:8px;border-radius:14px;background:#FAF9FE;${got ? '' : 'filter:grayscale(1);opacity:.4'}">${medal(b[2], b[4])}<b style="font-size:13px;line-height:1.2">${esc(b[1])}</b><small style="color:var(--soft);font-size:11.5px">${got ? new Date(got.at).toLocaleDateString('en-GB') : 'Not yet'}</small></div>`; }).join('')}</div></div>
+    <div class="panel"><h2>Module 2 · Music Theory</h2>${m.chapters.map((c) => `<div class="chap"><div class="hd"><span>Chapter ${c.n}: ${esc(c.title)}</span><span>${c.done}/${c.total} · ★ ${c.stars}</span></div><div class="acts">${c.acts.map((a) => `<span class="act ${a.stars ? '' : 'none'}">${esc(a.title)} ${a.stars ? `<b>${'★'.repeat(a.stars)}</b>` : ''}</span>`).join('')}</div></div>`).join('')}</div>
+    <div class="panel"><h2>Module 3 · Music Studio</h2><p style="margin:0 0 10px;color:var(--soft)">${m.lessons} lessons played · ★ ${m.m3stars}${m.songs ? ` · ${m.songs} song${m.songs > 1 ? 's' : ''} written` : ''}</p>
+      <div class="chips">${Object.entries(CAT.m3).map(([k, n]) => `<span class="${m.played.includes(k) ? 'on' : ''}">${esc(n)}${m.per[k] ? ' ★' + m.per[k].st : ''}</span>`).join('')}</div>
+      <h3 style="margin:16px 0 8px;font-size:17px">Note Hero</h3><p style="margin:0;color:var(--soft)">${m.heroBest ? `Best score <b style="color:var(--ink)">${m.heroBest.toLocaleString('en-GB')}</b> · ★ ${m.heroStars} · levels passed: ${m.levels.length ? m.levels.join(', ') : 'none yet'} · ${m.heroPlays} games` : 'Not played yet.'}</p></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn soft" id="dpw">Reset password</button><button class="btn danger" id="ddel">Delete student</button></div></aside>`;
+  document.body.appendChild(sc);
+  const close = () => sc.remove(); sc.onclick = (e) => { if (e.target === sc || e.target.closest('[data-x]')) close(); };
+  $('#dpw', sc).onclick = () => pwModal(s);
+  $('#ddel', sc).onclick = () => delStudent(s, close);
+}
+
+/* ---------- modal helpers ---------- */
+function modal(html, onOk, onMount) {
+  const sc = document.createElement('div'); sc.className = 'scrim'; sc.innerHTML = `<div class="modal">${html}</div>`; document.body.appendChild(sc);
+  const m = $('.modal', sc), close = () => sc.remove();
+  sc.onclick = (e) => { if (e.target === sc || e.target.closest('[data-x]')) close(); };
+  if (onMount) onMount(m);
+  const ok = $('#ok', m); const f = $('input', m); f && f.focus();
+  ok.onclick = async () => { ok.disabled = true; try { await onOk(m); close(); } catch (e) { $('#merr', m).textContent = e.message; ok.disabled = false; } };
+  m.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') ok.click(); if (e.key === 'Escape') close(); });
+}
+function confirmBox(t, p, okText, fn) { modal(`<h3>${esc(t)}</h3><p style="color:var(--soft);margin:0 0 12px">${esc(p)}</p><div class="err" id="merr"></div><div class="mfoot"><button class="btn soft" data-x>Cancel</button><button class="btn danger" id="ok">${esc(okText)}</button></div>`, fn); }
+function csv(c, st) {
+  const rows = [['Name', 'Username', 'Theory activities done', 'Theory %', 'Stars', 'Points', 'Instruments played', 'Note Hero best', 'Last active', 'Remark']]
+    .concat(st.map((s) => [s.name, s.username, `${s.sum.done}/${s.sum.total}`, s.sum.pct, s.sum.stars + s.sum.m3stars, s.sum.points, s.sum.played.length, s.sum.heroBest, s.lastActive ? new Date(s.lastActive).toLocaleString('en-GB') : '', s.sum.remark]));
+  const blob = new Blob([rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = c.name.replace(/[^\w]+/g, '_') + '_scores.csv'; a.click();
+}
+setInterval(async () => { if (!token || $('#app').hidden || document.querySelector('.scrim')) return; try { await refresh(); render(); } catch (e) {} }, 60000);
+if (token) start();
+})();
+</script>
+</body>
+</html>
